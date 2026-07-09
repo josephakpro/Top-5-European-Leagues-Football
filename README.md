@@ -24,7 +24,7 @@ The dataset consists of 41 variables covering attacking, defensive, buildup, and
 
 **Key Cleaning & Scaling Steps:**
 
-* **Metric Standardization:** Prioritized `/90` and `(%)` metrics over raw totals to eliminate possession bias (e.g., a team with 30% possession will naturally have higher raw defensive totals, which skews analysis).
+* **Metric Standardization:** Prioritized `/90` and `(%)` metrics over raw totals to eliminate possession bias
 * **Feature Scaling:** Applied `StandardScaler` (Mean = 0, Variance = 1) prior to any distance-based algorithms (K-Means, PCA) to ensure percentage metrics and volume metrics were weighted equally.
 * **Dimensionality Reduction & Multicollinearity:** Addressed highly correlated variables (e.g., `Goals_scored` and `xG`) through feature grouping and PCA.
 

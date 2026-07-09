@@ -62,3 +62,5 @@ Transition the static end-of-season PCA models into a chronological rolling-wind
 * **Injury Crises:** Measure how the loss of key personnel forces structural changes to a team's build-up or defensive solidity.
 
 * **Transfer Window Impact:** Analyze how mid-season signings or departures alter a team's identity and overall performance trajectory.
+
+* **European Top 5 Leagues Expansion:** Scale the pipeline across Europe's Top 5 leagues simultaneously, fitting a single global PCA model to place all 90+ clubs and apply league-based hue mapping to evaluate whether modern football has completely homogenized playstyles or if distinct domestic cultural identities still dominates.

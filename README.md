@@ -1,1 +1,70 @@
-# LaLiga-Teams-Analysis
+# ⚽ LaLiga-Teams-Analysis (2025/2026)
+
+![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
+![Scikit-Learn](https://img.shields.io/badge/Machine%20Learning-Scikit--Learn-orange.svg)
+![Pandas](https://img.shields.io/badge/Data%20Analysis-Pandas-blue.svg)
+
+## 📖 Project Overview
+
+This project applies machine learning and statistical analysis to 41 distinct team performance metrics from the La Liga 2025/2026 season. The goal is to move beyond basic descriptive statistics (like possession or goals scored) to mathematically quantify **Tactical Identity** and **Overall Performance**.
+
+The repository culminates in a comprehensive Sub-Domain Principal Component Analysis (PCA) that objectively maps team philosophies and identifies structural anomalies within the league.
+
+## 📑 Table of Contents
+
+1. [Data Pipeline & Preprocessing](#data-pipeline--preprocessing)
+2. [K-Means Clustering: Tactical Profiles](#k-means-clustering-tactical-profiles)
+3. [Sub-Domain PCA: The Tactical Matrix](#sub-domain-pca-the-tactical-matrix)
+4. [Installation & Usage](#installation--usage)
+5. [Future Work](#future-work)
+
+## 🧹 Data Pipeline & Preprocessing
+
+The dataset consists of 41 variables covering attacking, defensive, buildup, and set-piece phases of play.
+
+**Key Cleaning & Scaling Steps:**
+
+* **Metric Standardization:** Prioritized `/90` and `(%)` metrics over raw totals to eliminate possession bias (e.g., a team with 30% possession will naturally have higher raw defensive totals, which skews analysis).
+* **Feature Scaling:** Applied `StandardScaler` (Mean = 0, Variance = 1) prior to any distance-based algorithms (K-Means, PCA) to ensure percentage metrics and volume metrics were weighted equally.
+* **Dimensionality Reduction & Multicollinearity:** Addressed highly correlated variables (e.g., `Goals_scored` and `xG`) through feature grouping and PCA.
+
+## 🔍 K-Means Clustering: Tactical Profiles
+
+Instead of analyzing all 41 variables simultaneously, the features were grouped into four distinct tactical domains. K-Means clustering was applied to each domain to categorize La Liga teams into discrete tactical buckets.
+
+* **Attacking Threat (Optimal K=2):** Separated the elite goal-scoring outliers (e.g., Real Madrid, Barcelona) from the rest of the league.
+* **Buildup Play (Optimal K=2):** Successfully isolated pure possession-based teams from direct, transition-heavy teams based on passing accuracy and cross volume.
+* **Defensive Solidity (Optimal K=2):** Differentiated high-pressing teams (`Possession_won_attacking_3rd/90`) from deep, low-block defensive teams (`Clearances/90`).
+* **Set Pieces (Optimal K=3):** Identified Set-Piece Dominators, Defensively Vulnerable teams, and middle-of-the-pack performers.
+
+*Visualized via Normalized Parallel Coordinate Plots (see `/notebooks`).*
+
+## 📐 Sub-Domain PCA: The Tactical Matrix
+
+Standard PCA often blends possession and defensive metrics, incorrectly categorizing possession-dominant teams if their defensive metrics skew a certain way (The "Barcelona Anomaly").
+
+To solve this, a **Sub-Domain PCA** approach was utilized:
+
+1. **X-Axis (Performance):** A PCA model trained *only* on Attacking/Defensive output metrics (xG, Goal Difference, Shots on Target, etc.). Extracts PC1 as a measure of overall quality.
+2. **Y-Axis (Identity):** A second PCA model trained *only* on Buildup metrics (Possession, Clearances, Long Balls). Extracts PC1 as a measure of Proactive vs. Reactive ball management.
+
+**The Result:** A clean, 4-quadrant tactical matrix separating the league into:
+
+* **Top-Right:** The Proactive Elite (High Quality, High Possession)
+* **Bottom-Right:** The Effective Pragmatists (High Quality, Direct/Reactive)
+* **Top-Left:** The Aspirational Possessors (Low Quality, High Possession)
+* **Bottom-Left:** The Pragmatic Survivors (Low Quality, Direct/Reactive)
+
+## 🚀 Installation & Usage
+
+### Prerequisites
+
+* Python 3.8+
+* Git
+
+### Local Setup
+
+1. Clone this repository:
+   ```bash
+   git clone [https://github.com/yourusername/LaLiga-Teams-Analysis.git](https://github.com/yourusername/LaLiga-Teams-Analysis.git)
+   cd LaLiga-Teams-Analysis

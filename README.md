@@ -54,17 +54,3 @@ To solve this, a **Sub-Domain PCA** approach was utilized:
 * **Bottom-Right:** The Effective Pragmatists (High Quality, Direct/Reactive)
 * **Top-Left:** The Aspirational Possessors (Low Quality, High Possession)
 * **Bottom-Left:** The Pragmatic Survivors (Low Quality, Direct/Reactive)
-
-## 🚀 Installation & Usage
-
-### Prerequisites
-
-* Python 3.8+
-* Git
-
-### Local Setup
-
-1. Clone this repository:
-   ```bash
-   git clone [https://github.com/yourusername/LaLiga-Teams-Analysis.git](https://github.com/yourusername/LaLiga-Teams-Analysis.git)
-   cd LaLiga-Teams-Analysis

@@ -15,8 +15,7 @@ The repository culminates in a comprehensive Sub-Domain Principal Component Anal
 1. [Data Pipeline & Preprocessing](#data-pipeline--preprocessing)
 2. [K-Means Clustering: Tactical Profiles](#k-means-clustering-tactical-profiles)
 3. [Sub-Domain PCA: The Tactical Matrix](#sub-domain-pca-the-tactical-matrix)
-4. [Installation & Usage](#installation--usage)
-5. [Future Work](#future-work)
+4. [Future Work](#future-work)
 
 ## 🧹 Data Pipeline & Preprocessing
 
@@ -54,3 +53,12 @@ To solve this, a **Sub-Domain PCA** approach was utilized:
 * **Bottom-Right:** The Effective Pragmatists (High Quality, Direct/Reactive)
 * **Top-Left:** The Aspirational Possessors (Low Quality, High Possession)
 * **Bottom-Left:** The Pragmatic Survivors (Low Quality, Direct/Reactive)
+
+## Future Work
+Transition the static end-of-season PCA models into a chronological rolling-window pipeline (e.g., 5-match rolling average). This will allow for the tracking of a team's tactical evolution over the season to quantify the impact of real-world events:
+
+* **Managerial Changes:** Mathematically capture whether a new coach implements a different tactical system and evaluate its immediate success.
+
+* **Injury Crises:** Measure how the loss of key personnel forces structural changes to a team's build-up or defensive solidity.
+
+* **Transfer Window Impact:** Analyze how mid-season signings or departures alter a team's identity and overall performance trajectory.

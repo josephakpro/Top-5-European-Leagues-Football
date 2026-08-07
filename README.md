@@ -31,7 +31,7 @@ By condensing 20+ match metrics into a two-axis Sub-Domain Principal Component A
 
 ## 🎯 Business Objective & Strategic Utility
 
-Modern football scouting and executive decision-making often rely on fragmented surface metrics (e.g., raw goal totals or possession percentages) that are susceptible to tactical bias and league quality inflation. This repository addresses those challenges by providing front offices with tools to:
+Modern football scouting and executive decision-making often rely on fragmented surface-level metrics (e.g., raw goal totals or possession percentages) that are susceptible to tactical bias and league-quality inflation. This repository addresses those challenges by providing front offices with tools to:
 
 * **Evaluate Managerial Efficiency:** Diagnose systemic issues (e.g., identifying "Sterile Possessors" that control the ball but fail to generate expected goals).
 * **Optimize Scouting & Resource Allocation:** Apply data-driven "difficulty discounts" when recruiting players from top-heavy leagues versus highly diverse tactical environments.
@@ -100,30 +100,3 @@ League Tactical Diversity Ranking (Game Control Axis MAD):
 3. Germany  (MAD: 1.492)
 4. England  (MAD: 1.434)
 5. Spain    (MAD: 0.644)  --> Most homogeneous playstyle distribution
-
-Plaintext
-
-Euro_Soccer_Tactical_Efficiency/
-│
-├── data/
-│   ├── raw_top5_euro_leagues_teams_stats/       # Raw league stats scraped per league
-│   │   ├── premierleague_team_stats.csv
-│   │   ├── laliga_team_stats.csv
-│   │   ├── ligue1_team_stats.csv
-│   │   ├── serieA_team_stats.csv
-│   │   └── bundesliga_team_stats.csv
-│   └── processed_tactical_data.csv              # Normalized per-90 master dataset
-│
-├── notebooks/
-│   ├── 01_Data_Extraction_and_Wrangling.ipynb   # Normalization pipelines & per-90 functions
-│   └── 02_PCA_and_KMeans_Clustering.ipynb       # Machine learning models & Plotly visuals
-│
-├── src/
-│   └── scraper.py                               # Selenium web scraping utility script
-│
-├── visuals/
-│   ├── sub_domain_pca_quadrants.png             # Sub-Domain PCA scatter biplot
-│   └── correlation_heatmaps.png                 # Performance vs Control heatmaps
-│
-├── app.py                                       # Streamlit interactive dashboard app
-└── requirements.txt                             # Python environment dependencies

@@ -25,19 +25,3 @@ By condensing complex, multi-dimensional match statistics into actionable insigh
 *   **Interactive Dashboards:** Built dynamic, interactive scatter plots and biplots using **Plotly Express**, allowing users to hover over data points to instantly view underlying team statistics and cluster assignments.
 *   **Exploratory Data Analysis:** Utilized **Seaborn** correlation heatmaps and parallel coordinate plots to visually map the DNA of each tactical cluster for non-technical stakeholders.
 
-## 🗂️ Repository Structure
-
-```text
-├── data/
-│   ├── raw_top5_euro_leagues_teams_stats/       # Raw CSV files extracted via web scraper
-│   └── processed_tactical_data.csv              # Cleaned, per-90 normalized dataset
-├── notebooks/
-│   ├── 01_data_extraction_and_cleaning.ipynb    # Scraping, joining, and feature engineering
-│   └── 02_pca_and_kmeans_clustering.ipynb       # Dimensionality reduction and ML models
-├── src/
-│   └── scraper.py                               # Selenium automation script
-├── visuals/
-│   ├── pca_quadrant_map.png
-│   └── correlation_heatmaps.png
-├── requirements.txt
-└── README.md

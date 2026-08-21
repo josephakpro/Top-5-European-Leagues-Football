@@ -9,7 +9,7 @@ import numpy as np
 # 1. Data Initialization & Pre-Processing
 # -----------------------------------------------------------------------------
 # Load your final exported dataset
-df = pd.read_csv(r"C:\Users\H.P\Downloads\Top 5 Soccer Euro League Comparison Analysis\final_dashboard_data.csv", encoding='latin1')
+df = pd.read_csv("final_dashboard_data.csv", encoding='latin1')
 
 # Rename columns for front-end executive readability
 rename_dict = {

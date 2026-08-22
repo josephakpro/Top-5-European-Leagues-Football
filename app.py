@@ -14,7 +14,7 @@ rename_dict = {
     'Performance_Axis': 'Performance Score',
     'Game_Control_Axis': 'Game Control Score',
     'Cluster_Label': 'Tactical Archetype',
-    'Average_salary( m)': 'Average Salary (€M)'
+    'Average_salary': 'Average Salary(€M)'
 }
 df = df.rename(columns=rename_dict)
 df['Tactical Archetype'] = df['Tactical Archetype'].astype(str)
@@ -83,7 +83,7 @@ app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif', 'padding': '20px
         dcc.RadioItems(
             id='market-map-size-toggle',
             options=[{'label': ' Uniform Size ', 'value': 'Uniform'}, 
-                     {'label': ' Scale by Average Salary ', 'value': 'Average Salary (€M)'}],
+                     {'label': ' Scale by Average Salary ', 'value': 'Average Salary(€M)'}],
             value='Uniform',
             inline=True
         ),
@@ -176,7 +176,7 @@ def update_market_map(color_by, size_by):
     fig = px.scatter(
         df, x='Game Control Score', y='Performance Score',
         color=color_by, size=size_col, hover_name='Team',
-        hover_data=['League', 'Tactical Archetype', 'Average Salary (€M)'],
+        hover_data=['League', 'Tactical Archetype', 'Average Salary(€M)'],
         title="Market Map (All Europe)"
     )
     return fig
@@ -191,7 +191,7 @@ def update_efficiency_matrix(selected_league):
     title_suffix = "(All Europe)" if selected_league == 'All' else f"(Filtered: {selected_league})"
     
     fig = px.scatter(
-        filtered_df, x='Average Salary (€M)', y='Performance Score',
+        filtered_df, x='Average Salary(€M)', y='Performance Score',
         color='League', hover_name='Team', trendline='ols',
         title=f"Efficiency Matrix: Payroll vs. Execution {title_suffix}"
     )
@@ -270,7 +270,7 @@ def update_radar(team_a, team_b, show_cluster_avg):
             ))
             
     if team_b:
-        add_radar_trace(team_b, color='red', fill=None)
+        add_radar_trace(team_b, color='red', fill=fill)
 
     fig.update_layout(
         polar=dict(radialaxis=dict(visible=False, range=[0, 1])),
@@ -283,4 +283,4 @@ def update_radar(team_a, team_b, show_cluster_avg):
 # 4. Run Server
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

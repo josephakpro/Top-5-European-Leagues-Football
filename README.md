@@ -1,4 +1,4 @@
-# ⚽ Top 5 European Leagues: Tactical Efficiency & Business Analytics (2025/2026)
+# ⚽ Top 5 European Leagues Football (2025/2026)
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![Scikit-Learn](https://img.shields.io/badge/Machine%20Learning-Scikit--Learn-orange.svg)
@@ -9,7 +9,7 @@
 
 An end-to-end data science and business intelligence pipeline designed to objectively evaluate team performance, tactical identity, and competitive equilibrium across Europe's Top 5 Leagues (Premier League, LaLiga, Ligue 1, Serie A, and Bundesliga).
 
-By condensing 20+ match metrics into a two-axis Sub-Domain Principal Component Analysis (PCA) matrix and applying K-Means clustering, this framework bridges the gap between raw Python execution and executive-level football operations.
+By condensing 20+ match metrics into a two-axis, using Principal Component Analysis (PCA) matrix and applying K-Means clustering, this framework bridges the gap between raw Python execution and executive-level football operations.
 
 ---
 
@@ -44,9 +44,9 @@ Modern football scouting and executive decision-making often rely on fragmented 
 The underlying dataset covers 96 clubs across five top-flight domestic leagues:
 
 * **Automated Data Extraction:** Web scraping pipeline built with `Selenium` and `BeautifulSoup` to ingest dynamic match stats and team performance logs.
-* **Domain-Specific Per-90 Normalization:** Accounted for match count discrepancies across leagues (34 matches in Bundesliga/Ligue 1 vs. 38 in EPL/LaLiga/Serie A) by programmatically normalizing all volume metrics:
+* **Stats Normalization:** Accounted for match count discrepancies across leagues (34 matches in Bundesliga/Ligue 1 vs. 38 in EPL/LaLiga/Serie A) by programmatically normalizing all volume metrics:
   $$\text{Per-90 Metric} = \frac{\text{Season Total}}{\text{Total Games Played}} \times 90$$
-* **Multicollinearity Removal & Feature Engineering:** Calculated custom conversion rates (e.g., Big Chance Conversion %, Pass Success %) and derived metrics while removing redundant features.
+* **Feature Engineering:** Calculated custom conversion rates (e.g., Big Chance Conversion %, Pass Success %) and derived metrics while removing redundant features.
 * **Feature Scaling:** Standardized all sub-domain variables using `StandardScaler` ($\mu = 0, \sigma^2 = 1$) to prevent high-volume passing metrics from distorting low-volume defensive attributes.
 
 ---
@@ -55,15 +55,15 @@ The underlying dataset covers 96 clubs across five top-flight domestic leagues:
 
 ### Sub-Domain PCA: The Tactical Matrix
 
-Rather than fitting a single global model, metrics were separated into two distinct tactical sub-domains to isolate **Lethality** from **Control**:
+Rather than fitting a single global model, metrics were separated into two distinct tactical sub-domains to isolate **Performance** from **Game Control**:
 
-1. **X-Axis — Performance Score (56.78% Variance Explained, Eigenvalue = 3.442):**
+1. **Performance Score (56.78% Variance Explained, Eigenvalue = 3.442):**
    * *Features:* Goals Scored/90, xG/90, Goals Conceded/90 (negative loading), xG Conceded/90 (negative loading), Shot Conversion %, Big Chance Conversion %.
    * *Strategic Meaning:* Quantifies overall clinical efficiency and defensive stability.
 
-2. **Y-Axis — Game Control Score (47.18% Variance Explained, Eigenvalue = 5.245):**
+2. **Game Control Score (47.18% Variance Explained, Eigenvalue = 5.245):**
    * *Features:* Possession %, Passes/90, Touches in Opposition Box/90, Possession Won Attacking 3rd/90, Clearances/90 (negative loading), Long Balls/90 (negative loading).
-   * *Strategic Meaning:* Measures proactive ball dominance versus reactive/direct style.
+   * *Strategic Meaning:* Measures game dominance and tactical identity (proactive, possession, reactive, direct...)
 
 #### Quadrant Profiling Matrix:
 * **Top-Right (High Control, High Performance):** The Proactive Elite (e.g., Real Madrid, PSG, Bayern Munich).

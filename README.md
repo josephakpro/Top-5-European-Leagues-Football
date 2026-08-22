@@ -33,9 +33,9 @@ By condensing 20+ match metrics into a two-axis, using Principal Component Analy
 
 Modern football scouting and executive decision-making often rely on fragmented surface-level metrics (e.g., raw goal totals or possession percentages) that are susceptible to tactical bias and league-quality inflation. This repository addresses those challenges by providing front offices with tools to:
 
-* **Evaluate Managerial Efficiency:** Diagnose systemic issues (e.g., identifying "Sterile Possessors" that control the ball but fail to generate expected goals).
-* **Optimize Scouting & Resource Allocation:** Apply data-driven "difficulty discounts" when recruiting players from top-heavy leagues versus highly diverse tactical environments.
-* **Identify Tactical Archetypes:** Group 96 clubs across 5 leagues into objective, playstyle-based clusters independent of domestic standings.
+* **Identify Tactical Archetypes:** Group 96 clubs across 5 leagues into playstyle-based clusters independent of domestic standings.
+* **Evaluate Managerial Efficiency:** Diagnose systemic issues or Undervalued tactics 
+* **Optimize Scouting & Resource Allocation:** Identify specific league characteristics allowing data-backed decision-making when recruiting players (top-heavy leagues, highly diverse tactical environments...)
 
 ---
 

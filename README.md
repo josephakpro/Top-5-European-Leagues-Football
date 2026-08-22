@@ -53,7 +53,7 @@ The underlying dataset covers 96 clubs across five top-flight domestic leagues:
 
 ## 🤖 Machine Learning & Methodology
 
-### Sub-Domain PCA: The Tactical Matrix
+### PCA: The Tactical Matrix
 
 Rather than fitting a single global model, metrics were separated into two distinct tactical sub-domains to isolate **Performance** from **Game Control**:
 
@@ -64,6 +64,8 @@ Rather than fitting a single global model, metrics were separated into two disti
 2. **Game Control Score (47.18% Variance Explained, Eigenvalue = 5.245):**
    * *Features:* Possession %, Passes/90, Touches in Opposition Box/90, Possession Won Attacking 3rd/90, Clearances/90 (negative loading), Long Balls/90 (negative loading).
    * *Strategic Meaning:* Measures game dominance and tactical identity (proactive, possession, reactive, direct...)
+
+<img width="1321" height="461" alt="image" src="https://github.com/user-attachments/assets/25e18745-3014-47ee-9263-e1c62e704516" />
 
 #### Quadrant Profiling Matrix:
 * **Top-Right (High Control, High Performance):** The Proactive Elite (e.g., Real Madrid, PSG, Bayern Munich).

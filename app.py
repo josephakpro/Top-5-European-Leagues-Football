@@ -187,7 +187,7 @@ def update_market_map(color_by, size_by):
     Input('efficiency-league-dropdown', 'value')
 )
 def update_efficiency_matrix(selected_league):
-    filtered_df = df if selected_league == 'All' else df[df['League'] == selected_league]
+    df[df['League'] == selected_league]
     title_suffix = "(All Europe)" if selected_league == 'All' else f"(Filtered: {selected_league})"
     
     fig = px.scatter(
@@ -234,14 +234,19 @@ def update_radar(team_a, team_b, show_cluster_avg):
     
     def add_radar_trace(team_name, color, fill='toself', name_override=None):
         team_data = df[df['Team'] == team_name].iloc[0]
-        raw_vals = team_data[radar_cols].values
-        scaled_vals = (raw_vals - radar_min) / (radar_max - radar_min)
+        raw_vals = team_data[radar_cols].values.tolist()
+        scaled_vals = ((team_data[radar_cols].values - radar_min) / (radar_max - radar_min)).tolist()
+        
+        # FIX: Append the first value to the end to close the polygon loop
+        raw_vals.append(raw_vals[0])
+        scaled_vals.append(scaled_vals[0])
+        theta_cols = radar_cols + [radar_cols[0]]
         
         display_name = name_override if name_override else team_name
         
         fig.add_trace(go.Scatterpolar(
             r=scaled_vals,
-            theta=radar_cols,
+            theta=theta_cols,
             fill=fill,
             name=display_name,
             line_color=color,
@@ -255,12 +260,17 @@ def update_radar(team_a, team_b, show_cluster_avg):
         if 'Show' in show_cluster_avg:
             cluster_id = df[df['Team'] == team_a]['Tactical Archetype'].values[0]
             cluster_df = df[df['Tactical Archetype'] == cluster_id]
-            avg_raw_vals = cluster_df[radar_cols].mean().values
-            avg_scaled_vals = (avg_raw_vals - radar_min) / (radar_max - radar_min)
+            avg_raw_vals = cluster_df[radar_cols].mean().values.tolist()
+            avg_scaled_vals = ((cluster_df[radar_cols].mean().values - radar_min) / (radar_max - radar_min)).tolist()
+            
+            # FIX: Append the first value to the end to close the loop
+            avg_raw_vals.append(avg_raw_vals[0])
+            avg_scaled_vals.append(avg_scaled_vals[0])
+            theta_cols = radar_cols + [radar_cols[0]]
             
             fig.add_trace(go.Scatterpolar(
                 r=avg_scaled_vals,
-                theta=radar_cols,
+                theta=theta_cols,
                 fill=None,
                 mode='lines',
                 line=dict(color='gray', dash='dash'),
@@ -270,15 +280,19 @@ def update_radar(team_a, team_b, show_cluster_avg):
             ))
             
     if team_b:
-        add_radar_trace(team_b, color='red', fill=None)
+        # FIX: Changed fill from None to 'toself' so the red shape fills in
+        add_radar_trace(team_b, color='red', fill='toself')
 
     fig.update_layout(
         polar=dict(radialaxis=dict(visible=False, range=[0, 1])),
         showlegend=True,
         title="Tactical DNA"
     )
+    
+    # Optional formatting: Lower the fill opacity so overlapping shapes are visible
+    fig.update_traces(fillcolor="rgba(0,0,0,0)", opacity=0.5, selector=dict(fill='toself'))
+    
     return fig
-
 # -----------------------------------------------------------------------------
 # 4. Run Server
 # -----------------------------------------------------------------------------

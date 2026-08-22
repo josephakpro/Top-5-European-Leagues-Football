@@ -60,7 +60,7 @@ app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif', 'padding': '20px
     html.Hr(),
 
     # --- SECTION 5: MACRO CONTEXT (LEAGUE HEALTH) ---
-    html.H3("Macro Context: League Health & Competitiveness"),
+    html.H3("Macro Context: League Comparison"),
     html.Div([
         html.Div([dcc.Graph(figure=fig_strength)], style={'width': '48%', 'display': 'inline-block'}),
         html.Div([dcc.Graph(figure=fig_diversity)], style={'width': '48%', 'display': 'inline-block', 'float': 'right'}),
@@ -68,7 +68,7 @@ app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif', 'padding': '20px
     html.Hr(),
 
     # --- SECTION 1: THE MARKET MAP ---
-    html.H3("The Market Map: Game Control vs. Performance"),
+    html.H3("Game Control vs. Performance"),
     html.Div([
         html.Label("Color By:"),
         dcc.RadioItems(
@@ -92,7 +92,7 @@ app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif', 'padding': '20px
     html.Hr(),
 
     # --- SECTION 4: THE EFFICIENCY MATRIX ---
-    html.H3("The Efficiency Matrix: Budget vs. Execution"),
+    html.H3("Budget vs. Performance"),
     html.Div([
         html.Label("Select League to Filter:"),
         dcc.Dropdown(
@@ -106,10 +106,10 @@ app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif', 'padding': '20px
     html.Hr(),
 
     # --- GLOBAL DROPDOWNS FOR SECTIONS 2 & 3 ---
-    html.H3("Micro Analysis: Tactical Twins & DNA"),
+    html.H3("Micro Analysis: Teams Comparison"),
     html.Div([
         html.Div([
-            html.Label("1. Select League:"),
+            html.Label("Select League:"),
             dcc.Dropdown(
                 id='league-dropdown',
                 options=[{'label': k, 'value': k} for k in league_team_dict.keys()],
@@ -118,12 +118,12 @@ app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif', 'padding': '20px
         ], style={'width': '30%', 'display': 'inline-block', 'marginRight': '2%'}),
         
         html.Div([
-            html.Label("2. Select Target Team (Team A):"),
+            html.Label("Select Target Team (Team A):"),
             dcc.Dropdown(id='team-a-dropdown'),
         ], style={'width': '30%', 'display': 'inline-block', 'marginRight': '2%'}),
 
         html.Div([
-            html.Label("3. Select Comparison Team (Team B) [Optional]:"),
+            html.Label("Select Comparison Team (Team B) [Optional]:"),
             dcc.Dropdown(
                 id='team-b-dropdown',
                 options=[{'label': t, 'value': t} for t in df['Team'].sort_values()],
@@ -134,16 +134,16 @@ app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif', 'padding': '20px
     html.Br(),
 
     # --- SECTION 2: TACTICAL TWIN FINDER ---
-    html.H4("Tactical Twin Finder"),
-    html.P("Top 3 closest teams based exclusively on Game Control absolute difference."),
+    html.H4("Most Similar Teams"),
+    #html.P("Top 3 closest teams based exclusively on Game Control absolute difference."),
     html.Div(id='tactical-twin-output', style={'display': 'flex', 'gap': '20px'}),
     html.Br(),
 
     # --- SECTION 3: TACTICAL DNA (RADAR CHART) ---
-    html.H4("Tactical DNA: Stats/90 Drill-Down"),
+    html.H4("Stats per Games Radar Chart"),
     dcc.Checklist(
         id='cluster-avg-toggle',
-        options=[{'label': ' Overlay Team A\'s Tactical Archetype Average', 'value': 'Show'}],
+        options=[{'label': ' Overlay Team A\'s Cluster Average', 'value': 'Show'}],
         value=[]
     ),
     dcc.Graph(id='dna-radar-chart')
@@ -177,7 +177,7 @@ def update_market_map(color_by, size_by):
         df, x='Game Control Score', y='Performance Score',
         color=color_by, size=size_col, hover_name='Team',
         hover_data=['League', 'Tactical Archetype', 'Average Salary(€M)'],
-        title="Market Map (All Europe)"
+        title="Game Control vs. Performance Scatterplot"
     )
     return fig
 
@@ -187,13 +187,13 @@ def update_market_map(color_by, size_by):
     Input('efficiency-league-dropdown', 'value')
 )
 def update_efficiency_matrix(selected_league):
-    df[df['League'] == selected_league]
+    filtered_df = df if selected_league == 'All' else df[df['League'] == selected_league]
     title_suffix = "(All Europe)" if selected_league == 'All' else f"(Filtered: {selected_league})"
     
     fig = px.scatter(
         filtered_df, x='Average Salary(€M)', y='Performance Score',
         color='League', hover_name='Team', trendline='ols',
-        title=f"Efficiency Matrix: Payroll vs. Execution {title_suffix}"
+        title=f"ROI {title_suffix}"
     )
     return fig
 
@@ -214,9 +214,9 @@ def find_tactical_twins(target_team):
     cards = []
     for _, row in top_3.iterrows():
         card = html.Div(style={'border': '1px solid #ccc', 'padding': '15px', 'borderRadius': '5px', 'width': '30%'}, children=[
-            html.H3(f"1. {row['Team']}", style={'marginTop': '0'}),
+            html.H3(f"{row['Team']}", style={'marginTop': '0'}),
             html.P(f"League: {row['League']}"),
-            html.P(f"Game Control Delta: {row['GC_Diff']:.3f}", style={'fontWeight': 'bold', 'color': '#007BFF'})
+            html.P(f"Difference: {row['GC_Diff']:.3f}", style={'fontWeight': 'bold', 'color': '#007BFF'})
         ])
         cards.append(card)
         
@@ -290,7 +290,7 @@ def update_radar(team_a, team_b, show_cluster_avg):
     )
     
     # Optional formatting: Lower the fill opacity so overlapping shapes are visible
-    fig.update_traces(fillcolor="rgba(0,0,0,0)", opacity=0.5, selector=dict(fill='toself'))
+    #fig.update_traces(fillcolor="rgba(0,0,0,0)", opacity=0.5, selector=dict(fill='toself'))
     
     return fig
 # -----------------------------------------------------------------------------

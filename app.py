@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, Input, Output, State
+from dash import dcc, html, Input, Output
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
@@ -8,10 +8,8 @@ import numpy as np
 # -----------------------------------------------------------------------------
 # 1. Data Initialization & Pre-Processing
 # -----------------------------------------------------------------------------
-# Load your final exported dataset
 df = pd.read_csv("final_dashboard_data.csv", encoding='latin1')
 
-# Rename columns for front-end executive readability
 rename_dict = {
     'Performance_Axis': 'Performance Score',
     'Game_Control_Axis': 'Game Control Score',
@@ -19,11 +17,8 @@ rename_dict = {
     'Average_salary(€m)': 'Average Salary (€M)'
 }
 df = df.rename(columns=rename_dict)
-
-# Ensure Tactical Archetype is treated as a categorical string, not a continuous number
 df['Tactical Archetype'] = df['Tactical Archetype'].astype(str)
 
-# Radar Chart Variables
 radar_cols = [
     'Possession(%)', 'Pass/90', 'Long_balls/90', 'Crosses/90', 
     'Clearances/90', 'Possession_won_midfield/90', 
@@ -31,20 +26,26 @@ radar_cols = [
     'Tackles/90', 'Interceptions/90', 'Saves/90'
 ]
 
-# Pre-calculate Min-Max for Radar Chart Normalization (0 to 1 scale)
 radar_min = df[radar_cols].min()
 radar_max = df[radar_cols].max()
 
-# Pre-calculate Macro League Health metrics using Mean Absolute Deviation (MAD)
-# This calculates the MAD for Strength Gap (Performance) and Tactical Diversity (Game Control)
 mad_df = df.groupby('League').apply(
     lambda x: pd.Series({
-        'Strength Gap': (x['Performance Score'] - x['Performance Score'].mean()).abs().mean(),
-        'Tactical Diversity': (x['Game Control Score'] - x['Game Control Score'].mean()).abs().mean()
+        'Strength Gap': (x['Performance Score'] - x['Performance Score'].median()).abs().median(),
+        'Tactical Diversity': (x['Game Control Score'] - x['Game Control Score'].median()).abs().median()
     })
 ).reset_index()
 
-# Create a Dictionary for Chained Dropdowns: {League: [Team1, Team2, ...]}
+# Pre-generate static Macro charts sorted DESC
+fig_strength = px.bar(
+    mad_df.sort_values('Strength Gap', ascending=False), 
+    x='League', y='Strength Gap', title="League Strength Gap"
+)
+fig_diversity = px.bar(
+    mad_df.sort_values('Tactical Diversity', ascending=False), 
+    x='League', y='Tactical Diversity', title="League Tactical Diversity"
+)
+
 league_team_dict = df.groupby('League')['Team'].apply(list).to_dict()
 
 # -----------------------------------------------------------------------------
@@ -59,15 +60,10 @@ app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif', 'padding': '20px
     html.Hr(),
 
     # --- SECTION 5: MACRO CONTEXT (LEAGUE HEALTH) ---
-    # Placed at the top so it acts as a global filter
     html.H3("Macro Context: League Health & Competitiveness"),
-    html.P("Click on a specific league's bar to filter the Market Map and Efficiency Matrix below. Double-click to reset."),
     html.Div([
-        dcc.Graph(
-            id='macro-bar-chart',
-            figure=px.bar(mad_df, x='League', y=['Strength Gap', 'Tactical Diversity'], 
-                          barmode='group', title="League MAD Coefficients (Click to Filter)")
-        )
+        html.Div([dcc.Graph(figure=fig_strength)], style={'width': '48%', 'display': 'inline-block'}),
+        html.Div([dcc.Graph(figure=fig_diversity)], style={'width': '48%', 'display': 'inline-block', 'float': 'right'}),
     ]),
     html.Hr(),
 
@@ -97,7 +93,15 @@ app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif', 'padding': '20px
 
     # --- SECTION 4: THE EFFICIENCY MATRIX ---
     html.H3("The Efficiency Matrix: Budget vs. Execution"),
-    html.P("This chart automatically filters based on your selection in the Macro Context chart above."),
+    html.Div([
+        html.Label("Select League to Filter:"),
+        dcc.Dropdown(
+            id='efficiency-league-dropdown',
+            options=[{'label': 'All Europe', 'value': 'All'}] + [{'label': k, 'value': k} for k in league_team_dict.keys()],
+            value='All',
+            style={'width': '30%'}
+        )
+    ]),
     dcc.Graph(id='efficiency-matrix-scatter'),
     html.Hr(),
 
@@ -131,7 +135,7 @@ app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif', 'padding': '20px
 
     # --- SECTION 2: TACTICAL TWIN FINDER ---
     html.H4("Tactical Twin Finder"),
-    html.P("Top 3 closest teams mathematically based exclusively on the Game Control PCA Score absolute difference."),
+    html.P("Top 3 closest teams based exclusively on Game Control absolute difference."),
     html.Div(id='tactical-twin-output', style={'display': 'flex', 'gap': '20px'}),
     html.Br(),
 
@@ -149,7 +153,7 @@ app.layout = html.Div(style={'fontFamily': 'Arial, sans-serif', 'padding': '20px
 # 3. Callbacks
 # -----------------------------------------------------------------------------
 
-# Callback to chain League dropdown to Team A dropdown
+# Chain League dropdown to Team A dropdown
 @app.callback(
     [Output('team-a-dropdown', 'options'),
      Output('team-a-dropdown', 'value')],
@@ -161,43 +165,39 @@ def update_team_dropdown(selected_league):
     teams = league_team_dict[selected_league]
     return [{'label': t, 'value': t} for t in teams], teams[0]
 
-# Callback to update Market Map and Efficiency Matrix based on Macro Chart Clicks
+# Update Market Map
 @app.callback(
-    [Output('market-map-scatter', 'figure'),
-     Output('efficiency-matrix-scatter', 'figure')],
-    [Input('macro-bar-chart', 'clickData'),
-     Input('market-map-color-toggle', 'value'),
+    Output('market-map-scatter', 'figure'),
+    [Input('market-map-color-toggle', 'value'),
      Input('market-map-size-toggle', 'value')]
 )
-def update_scatter_plots(clickData, color_by, size_by):
-    # Determine if a league is filtered via click
-    filtered_df = df.copy()
-    title_suffix = "(All Europe)"
-    
-    if clickData:
-        clicked_league = clickData['points'][0]['x']
-        filtered_df = df[df['League'] == clicked_league]
-        title_suffix = f"(Filtered: {clicked_league})"
-    
-    # Market Map Figure
+def update_market_map(color_by, size_by):
     size_col = size_by if size_by != 'Uniform' else None
-    market_fig = px.scatter(
-        filtered_df, x='Game Control Score', y='Performance Score',
+    fig = px.scatter(
+        df, x='Game Control Score', y='Performance Score',
         color=color_by, size=size_col, hover_name='Team',
         hover_data=['League', 'Tactical Archetype', 'Average Salary (€M)'],
-        title=f"Market Map {title_suffix}"
+        title="Market Map (All Europe)"
     )
+    return fig
+
+# Update Efficiency Matrix
+@app.callback(
+    Output('efficiency-matrix-scatter', 'figure'),
+    Input('efficiency-league-dropdown', 'value')
+)
+def update_efficiency_matrix(selected_league):
+    filtered_df = df if selected_league == 'All' else df[df['League'] == selected_league]
+    title_suffix = "(All Europe)" if selected_league == 'All' else f"(Filtered: {selected_league})"
     
-    # Efficiency Matrix Figure (Salary vs Performance with Trendline)
-    eff_fig = px.scatter(
+    fig = px.scatter(
         filtered_df, x='Average Salary (€M)', y='Performance Score',
         color='League', hover_name='Team', trendline='ols',
         title=f"Efficiency Matrix: Payroll vs. Execution {title_suffix}"
     )
-    
-    return market_fig, eff_fig
+    return fig
 
-# Callback to calculate Tactical Twins
+# Calculate Tactical Twins
 @app.callback(
     Output('tactical-twin-output', 'children'),
     Input('team-a-dropdown', 'value')
@@ -206,30 +206,23 @@ def find_tactical_twins(target_team):
     if not target_team:
         return ""
     
-    # Get target team's Game Control Score
     target_gc = df[df['Team'] == target_team]['Game Control Score'].values[0]
-    
-    # Calculate absolute difference for all teams except the target team
     twin_df = df[df['Team'] != target_team].copy()
     twin_df['GC_Diff'] = (twin_df['Game Control Score'] - target_gc).abs()
-    
-    # Sort and get top 3
     top_3 = twin_df.sort_values('GC_Diff').head(3)
     
-    # Create HTML Cards for output
     cards = []
     for _, row in top_3.iterrows():
         card = html.Div(style={'border': '1px solid #ccc', 'padding': '15px', 'borderRadius': '5px', 'width': '30%'}, children=[
             html.H3(f"1. {row['Team']}", style={'marginTop': '0'}),
             html.P(f"League: {row['League']}"),
-            html.P(f"Tactical Archetype: {row['Tactical Archetype']}"),
             html.P(f"Game Control Delta: {row['GC_Diff']:.3f}", style={'fontWeight': 'bold', 'color': '#007BFF'})
         ])
         cards.append(card)
         
     return cards
 
-# Callback to generate the normalized Radar Chart
+# Generate Normalized Radar Chart (Raw values on hover)
 @app.callback(
     Output('dna-radar-chart', 'figure'),
     [Input('team-a-dropdown', 'value'),
@@ -242,7 +235,6 @@ def update_radar(team_a, team_b, show_cluster_avg):
     def add_radar_trace(team_name, color, fill='toself', name_override=None):
         team_data = df[df['Team'] == team_name].iloc[0]
         raw_vals = team_data[radar_cols].values
-        # Min-Max Normalization so all shapes fit cleanly on the 0-1 scale axis
         scaled_vals = (raw_vals - radar_min) / (radar_max - radar_min)
         
         display_name = name_override if name_override else team_name
@@ -254,14 +246,12 @@ def update_radar(team_a, team_b, show_cluster_avg):
             name=display_name,
             line_color=color,
             customdata=raw_vals,
-            hovertemplate="<b>%{theta}</b><br>Raw Value: %{customdata:.2f}<br>Normalized Scale: %{r:.2f}<extra></extra>"
+            hovertemplate="<b>%{theta}</b><br>Raw Value: %{customdata:.2f}<extra></extra>"
         ))
     
-    # Add Team A
     if team_a:
         add_radar_trace(team_a, color='blue')
         
-        # Add Cluster Average if toggled
         if 'Show' in show_cluster_avg:
             cluster_id = df[df['Team'] == team_a]['Tactical Archetype'].values[0]
             cluster_df = df[df['Tactical Archetype'] == cluster_id]
@@ -279,14 +269,13 @@ def update_radar(team_a, team_b, show_cluster_avg):
                 hovertemplate="<b>%{theta}</b><br>Cluster Avg: %{customdata:.2f}<extra></extra>"
             ))
             
-    # Add Team B
     if team_b:
         add_radar_trace(team_b, color='red', fill=None)
 
     fig.update_layout(
         polar=dict(radialaxis=dict(visible=False, range=[0, 1])),
         showlegend=True,
-        title="Tactical DNA (Normalized 0-1 Scale)"
+        title="Tactical DNA"
     )
     return fig
 
@@ -294,4 +283,4 @@ def update_radar(team_a, team_b, show_cluster_avg):
 # 4. Run Server
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run(debug=False)

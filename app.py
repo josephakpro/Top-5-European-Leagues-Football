@@ -270,7 +270,7 @@ def update_radar(team_a, team_b, show_cluster_avg):
             ))
             
     if team_b:
-        add_radar_trace(team_b, color='red', fill=fill)
+        add_radar_trace(team_b, color='red', fill=None)
 
     fig.update_layout(
         polar=dict(radialaxis=dict(visible=False, range=[0, 1])),

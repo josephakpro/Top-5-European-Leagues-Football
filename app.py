@@ -29,6 +29,7 @@ radar_cols = [
 radar_min = df[radar_cols].min()
 radar_max = df[radar_cols].max()
 
+# Calculate Macro League Health metrics using Mean Absolute Deviation (MAD)
 mad_df = df.groupby('League').apply(
     lambda x: pd.Series({
         'Strength Gap': (x['Performance Score'] - x['Performance Score'].median()).abs().median(),
@@ -36,14 +37,20 @@ mad_df = df.groupby('League').apply(
     })
 ).reset_index()
 
-# Pre-generate static Macro charts sorted DESC
+# --- Min-Max Scale the Coefficients to 0-1 ---
+
+mad_df['Strength Gap'] = (mad_df['Strength Gap'] - mad_df['Strength Gap'].min()) / (mad_df['Strength Gap'].max() - mad_df['Strength Gap'].min())
+mad_df['Tactical Diversity'] = (mad_df['Tactical Diversity'] - mad_df['Tactical Diversity'].min()) / (mad_df['Tactical Diversity'].max() - mad_df['Tactical Diversity'].min())
+# -------------------------------------------------------
+
+# Charts sorted DESC
 fig_strength = px.bar(
     mad_df.sort_values('Strength Gap', ascending=False), 
-    x='League', y='Strength Gap', title="League Strength Gap"
+    x='League', y='Strength Gap', title="League Strength Gap (Scaled 0-1)"
 )
 fig_diversity = px.bar(
     mad_df.sort_values('Tactical Diversity', ascending=False), 
-    x='League', y='Tactical Diversity', title="League Tactical Diversity"
+    x='League', y='Tactical Diversity', title="League Tactical Diversity (Scaled 0-1)"
 )
 
 league_team_dict = df.groupby('League')['Team'].apply(list).to_dict()

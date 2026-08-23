@@ -205,6 +205,7 @@ def update_efficiency_matrix(selected_league):
     return fig
 
 # Calculate Tactical Twins
+# Calculate Tactical Twins (Updated to use % Similarity)
 @app.callback(
     Output('tactical-twin-output', 'children'),
     Input('team-a-dropdown', 'value')
@@ -213,17 +214,35 @@ def find_tactical_twins(target_team):
     if not target_team:
         return ""
     
+    # 1. Get the global maximum range for Game Control in the dataset
+    gc_max = df['Game Control Score'].max()
+    gc_min = df['Game Control Score'].min()
+    max_range = gc_max - gc_min
+    
+    # 2. Get target team's Game Control Score
     target_gc = df[df['Team'] == target_team]['Game Control Score'].values[0]
+    
+    # 3. Calculate absolute difference and transform into a Similarity Percentage
     twin_df = df[df['Team'] != target_team].copy()
     twin_df['GC_Diff'] = (twin_df['Game Control Score'] - target_gc).abs()
-    top_3 = twin_df.sort_values('GC_Diff').head(3)
     
+    # Apply the mathematical transformation
+    twin_df['Similarity_Pct'] = (1 - (twin_df['GC_Diff'] / max_range)) * 100
+    
+    # 4. Sort by the highest similarity and get top 3
+    top_3 = twin_df.sort_values('Similarity_Pct', ascending=False).head(3)
+    
+    # 5. Create HTML Cards for output
     cards = []
-    for _, row in top_3.iterrows():
+    for rank, (_, row) in enumerate(top_3.iterrows(), start=1):
         card = html.Div(style={'border': '1px solid #ccc', 'padding': '15px', 'borderRadius': '5px', 'width': '30%'}, children=[
-            html.H3(f"{row['Team']}", style={'marginTop': '0'}),
+            html.H3(f"{rank}. {row['Team']}", style={'marginTop': '0'}),
             html.P(f"League: {row['League']}"),
-            html.P(f"Difference: {row['GC_Diff']:.3f}", style={'fontWeight': 'bold', 'color': '#007BFF'})
+            # Display the new metric with a progress-bar style visual cue
+            html.Div(style={'marginTop': '10px'}, children=[
+                html.Span("Tactical Similarity: ", style={'fontWeight': 'bold'}),
+                html.Span(f"{row['Similarity_Pct']:.1f}%", style={'fontWeight': 'bold', 'color': '#28a745', 'fontSize': '1.2em'})
+            ])
         ])
         cards.append(card)
         

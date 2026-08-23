@@ -204,8 +204,7 @@ def update_efficiency_matrix(selected_league):
     )
     return fig
 
-# Calculate Tactical Twins
-# Calculate Tactical Twins (Updated to use % Similarity)
+# Calculate Tactical Twins (Based on 11-Metric Radar DNA Similarity)
 @app.callback(
     Output('tactical-twin-output', 'children'),
     Input('team-a-dropdown', 'value')
@@ -214,33 +213,37 @@ def find_tactical_twins(target_team):
     if not target_team:
         return ""
     
-    # 1. Get the global maximum range for Game Control in the dataset
-    gc_max = df['Game Control Score'].max()
-    gc_min = df['Game Control Score'].min()
-    max_range = gc_max - gc_min
+    # 1. Normalize the entire dataframe to a 0-1 scale using your pre-calculated min/max
+    # This prevents high-volume stats (like 500 passes) from overpowering low-volume stats (like 50% possession)
+    df_scaled = df.copy()
+    for col in radar_cols:
+        df_scaled[col] = (df[col] - radar_min[col]) / (radar_max[col] - radar_min[col])
+        
+    # 2. Get the target team's normalized stats
+    target_stats = df_scaled[df_scaled['Team'] == target_team][radar_cols].iloc[0]
     
-    # 2. Get target team's Game Control Score
-    target_gc = df[df['Team'] == target_team]['Game Control Score'].values[0]
+    # 3. Calculate Mean Absolute Error (MAE) across all 11 stats for every other team
+    twin_df = df_scaled[df_scaled['Team'] != target_team].copy()
+    twin_df['Average_Gap'] = (twin_df[radar_cols] - target_stats).abs().mean(axis=1)
     
-    # 3. Calculate absolute difference and transform into a Similarity Percentage
-    twin_df = df[df['Team'] != target_team].copy()
-    twin_df['GC_Diff'] = (twin_df['Game Control Score'] - target_gc).abs()
+    # 4. Convert to a Similarity Percentage (100% - the average gap)
+    twin_df['Similarity_Pct'] = (1 - twin_df['Average_Gap']) * 100
     
-    # Apply the mathematical transformation
-    twin_df['Similarity_Pct'] = (1 - (twin_df['GC_Diff'] / max_range)) * 100
+    # 5. Sort by highest similarity
+    top_3_indices = twin_df.sort_values('Similarity_Pct', ascending=False).head(3).index
     
-    # 4. Sort by the highest similarity and get top 3
-    top_3 = twin_df.sort_values('Similarity_Pct', ascending=False).head(3)
+    # 6. Retrieve the original unscaled team data and attach the new Similarity score
+    top_3 = df.loc[top_3_indices].copy()
+    top_3['Similarity_Pct'] = twin_df.loc[top_3_indices, 'Similarity_Pct']
     
-    # 5. Create HTML Cards for output
+    # 7. Create HTML Cards for output
     cards = []
     for rank, (_, row) in enumerate(top_3.iterrows(), start=1):
         card = html.Div(style={'border': '1px solid #ccc', 'padding': '15px', 'borderRadius': '5px', 'width': '30%'}, children=[
             html.H3(f"{rank}. {row['Team']}", style={'marginTop': '0'}),
             html.P(f"League: {row['League']}"),
-            # Display the new metric with a progress-bar style visual cue
             html.Div(style={'marginTop': '10px'}, children=[
-                html.Span("Tactical Similarity: ", style={'fontWeight': 'bold'}),
+                html.Span("Tactical DNA Match: ", style={'fontWeight': 'bold'}),
                 html.Span(f"{row['Similarity_Pct']:.1f}%", style={'fontWeight': 'bold', 'color': '#28a745', 'fontSize': '1.2em'})
             ])
         ])

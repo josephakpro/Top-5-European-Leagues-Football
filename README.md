@@ -1,104 +1,130 @@
-# ⚽ Top 5 European Leagues Football (2025/2026)
+# ⚽ Top 5 European Leagues Football Analysis & Dashboard
 
-![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
-![Scikit-Learn](https://img.shields.io/badge/Machine%20Learning-Scikit--Learn-orange.svg)
-![Pandas](https://img.shields.io/badge/Data%20Analysis-Pandas-blue.svg)
-![Plotly](https://img.shields.io/badge/Visualization-Plotly-red.svg)
+[![Live Dashboard](https://img.shields.io/badge/Render-Live%20Demo-brightgreen?logo=render)](https://top-5-european-leagues-football.onrender.com/)
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg?logo=python)](https://www.python.org/)
+[![Scikit-Learn](https://img.shields.io/badge/Machine%20Learning-Scikit--Learn-orange.svg?logo=scikit-learn)](https://scikit-learn.org/)
+[![Plotly Dash](https://img.shields.io/badge/Dashboard-Plotly%20Dash-red.svg?logo=plotly)](https://dash.plotly.com/)
+[![Pandas](https://img.shields.io/badge/Data%20Analysis-Pandas-blue.svg?logo=pandas)](https://pandas.pydata.org/)
 
 ---
 
-An end-to-end data science and business intelligence pipeline designed to objectively evaluate team performance, tactical identity, and competitive equilibrium across Europe's Top 5 Leagues (Premier League, LaLiga, Ligue 1, Serie A, and Bundesliga).
+An end-to-end sports analytics and business intelligence project evaluating team performance, tactical profiles, and financial efficiency across Europe's top 5 domestic leagues (**Premier League (England), LaLiga (Spain), Ligue 1 (France), Serie A (Italy), and Bundesliga (Germany)**).
 
-By condensing 20+ match metrics into a two-axis, using Principal Component Analysis (PCA) matrix and applying K-Means clustering, this framework bridges the gap between raw Python execution and executive-level football operations.
+By condensing 20+ team-level stats and wage metrics through **Principal Component Analysis (PCA)** and **K-Means Clustering**, this project categorizes 96 clubs into distinct tactical archetypes and visualizes their performance in a deployed interactive web dashboard.
+
+🔗 **Live Web Application:** [Top 5 European Leagues Football Dashboard](https://top-5-european-leagues-football.onrender.com/)
 
 ---
 
 ## 📋 Table of Contents
 
-1. [Business Objective & Strategic Utility](#-business-objective--strategic-utility)
-2. [Data Pipeline & Normalization](#-data-pipeline--normalization)
+1. [Business Objective & Executive Utility](#-business-objective--executive-utility)
+2. [Data Pipeline & Feature Engineering](#-data-pipeline--feature-engineering)
 3. [Machine Learning & Methodology](#-machine-learning--methodology)
-   - [Sub-Domain PCA: The Tactical Matrix](#sub-domain-pca-the-tactical-matrix)
+   - [PCA: Tactical Matrix](#sub-domain-pca-the-tactical-matrix)
    - [K-Means Tactical Archetypes](#k-means-tactical-archetypes)
-4. [Macro-Level League Insights](#-macro-level-league-insights)
+4. [Macro-Level League & Financial Insights](#-macro-level-league--financial-insights)
 5. [Interactive Dashboard Features](#-interactive-dashboard-features)
-6. [Future Work](#-future-work)
-7. [Technical Stack & Tools](#-technical-stack--tools)
-8. [Repository Structure](#-repository-structure)
-9. [Getting Started](#-getting-started)
+6. [Tech Stack](#-tech-stack)
+7. [Repository Structure](#-repository-structure)
+8. [Getting Started & Local Setup](#-getting-started--local-setup)
 
 ---
 
-## 🎯 Business Objective & Strategic Utility
+## 🎯 Business Objective & Executive Utility
 
-Modern football scouting and executive decision-making often rely on fragmented surface-level metrics (e.g., raw goal totals or possession percentages) that are susceptible to tactical bias and league-quality inflation. This repository addresses those challenges by providing front offices with tools to:
+Traditional scouting and front-office evaluations frequently rely on raw volume metrics (e.g., total goals, passes, or clean sheets) that are prone to tactical biases, match-count discrepancies, and league quality distortions. This project bridges raw statistical computing with strategic football operations to:
 
-* **Identify Tactical Archetypes:** Group 96 clubs across 5 leagues into playstyle-based clusters independent of domestic standings.
-* **Evaluate Managerial Efficiency:** Diagnose systemic issues or Undervalued tactics 
-* **Optimize Scouting & Resource Allocation:** Identify specific league characteristics allowing data-backed decision-making when recruiting players (top-heavy leagues, highly diverse tactical environments...)
-
+* **Categorize Tactical Archetypes:** Cluster 96 clubs across 5 leagues into playstyle profiles independent of domestic table standings.
+* **Assess Tactical & Managerial Efficiency:** Diagnose systemic issues or undervalued tactics
+* **Integrate Financial & Performance Context:** Contrast payroll distribution and estimated wages against on-pitch dominance to identify over- and under-performing squads.
 ---
 
-## 🧹 Data Pipeline & Normalization
+## 🧹 Data Pipeline & Feature Engineering
 
-The underlying dataset covers 96 clubs across five top-flight domestic leagues:
+The dataset consolidates match statistics and wage estimations across 96 clubs in the top 5 European leagues:
 
 * **Automated Data Extraction:** Web scraping pipeline built with `Selenium` and `BeautifulSoup` to ingest dynamic match stats and team performance logs.
-* **Stats Normalization:** Accounted for match count discrepancies across leagues (34 matches in Bundesliga/Ligue 1 vs. 38 in EPL/LaLiga/Serie A) by programmatically normalizing all volume metrics:
-  $$\text{Per-90 Metric} = \frac{\text{Season Total}}{\text{Total Games Played}} \times 90$$
+* **Season Length Normalization (Per-90 Metrics):** Handled domestic fixture discrepancies (34 matches in Bundesliga and Ligue 1 vs. 38 matches in Premier League, LaLiga, and Serie A) to standardize all volume metrics:
+  $$\text{Metric / 90} = \frac{\text{Season Total}}{\text{Matches Played}} \times 90$$
+* **Financial Data Integration:** Integrated club wage estimations (average salary in €M and total annual payroll in €M).  
+  > *Note: Wage statistics are estimated club figures (sourced from FootyStats) for comparative performance context.*
 * **Feature Engineering:** Calculated custom conversion rates (e.g., Big Chance Conversion %, Pass Success %) and derived metrics while removing redundant features.
-* **Feature Scaling:** Standardized all sub-domain variables using `StandardScaler` ($\mu = 0, \sigma^2 = 1$) to prevent high-volume passing metrics from distorting low-volume defensive attributes.
-
+* **Feature Scaling:** Applied `StandardScaler` to eliminate scale disparities between high and low volume metrics (Possession% or Goals per game)
+* 
 ---
 
 ## 🤖 Machine Learning & Methodology
 
 ### PCA: The Tactical Matrix
 
-Rather than fitting a single global model, metrics were separated into two distinct tactical sub-domains to isolate **Performance** from **Game Control**:
+To avoid conflating playstyle & dominance with efficiency (attacking and defending), the different metrics were decomposed into two distinct sub-domains:
 
-1. **Performance Score (56.78% Variance Explained, Eigenvalue = 3.442):**
-   * *Features:* Goals Scored/90, xG/90, Goals Conceded/90 (negative loading), xG Conceded/90 (negative loading), Shot Conversion %, Big Chance Conversion %.
-   * *Strategic Meaning:* Quantifies overall clinical efficiency and defensive stability.
+1. **Performance Index:**
+   * *Features:* Goals Scored/90, xG/90, Goals Conceded/90 (negative), xG Conceded/90 (negative), Shot Conversion %, Big Chance Conversion %.
+   * *Strategic Focus:* Evaluates finishing clinicality, offensive threat, and defensive solidity.
 
-2. **Game Control Score (47.18% Variance Explained, Eigenvalue = 5.245):**
-   * *Features:* Possession %, Passes/90, Touches in Opposition Box/90, Possession Won Attacking 3rd/90, Clearances/90 (negative loading), Long Balls/90 (negative loading).
-   * *Strategic Meaning:* Measures game dominance and tactical identity (proactive, possession, reactive, direct...)
+2. **Game Control Index:**
+   * *Features:* Possession %, Passes/90, Touches in Opposition Box/90, Possession Won in Attacking 3rd/90, Clearances/90 (negative), Long Balls/90 (negative).
+   * *Strategic Focus:* Measures territorial dominance, build-up patience, and high-pressing intensity.
 
 <img width="1321" height="461" alt="image" src="https://github.com/user-attachments/assets/25e18745-3014-47ee-9263-e1c62e704516" />
 
-#### Quadrant Profiling Matrix:
-* **Top-Right (High Control, High Performance):** The Proactive Elite (e.g., Real Madrid, PSG, Bayern Munich).
-* **Bottom-Right (Low Control, High Performance):** Sustainable & Effective Counter-Attackers.
-* **Top-Left (High Control, Low Performance):** Sterile Possessors (High ball dominance, severe lack of penetration).
-* **Bottom-Left (Low Control, Low Performance):** Reactive/Pragmatic Survivors fighting relegation.
+#### Tactical Quadrant Mapping
+* **High Control & High Performance:** Proactive Elite (e.g., dominant title contenders maintaining both territory and clinical efficiency).
+* **Low Control & High Performance:** Direct & Lethal Counter-Attackers (efficient transition units with low possession volume).
+* **High Control & Low Performance:** Sterile Dominators (high possession and field tilt with inadequate box penetration or finishing).
+* **Low Control & Low Performance:** Pragmatic & Reactive Survivors (deep-block structures battling relegation).
 
 ### K-Means Tactical Archetypes
 
-Applied unsupervised K-Means clustering across Game Control metrics, using the **Elbow Method** (Sum of Squared Errors) to determine the optimal $K=4$ clusters:
+Using the **Elbow Method** and **Silhouette Analysis** (combined with industry knowledge), $K=4$ was selected as the optimal cluster count to classify the different styles:
 
-* **Cluster 0 — Deep Block / Direct Teams (36 Teams):** Reactive, low-possession, heavy clearance reliance.
-* **Cluster 1 — Elite Dominators (14 Teams):** Dominant possession, high pressing in attacking 3rd, high box touch volume.
-* **Cluster 2 — Transition Specialists (19 Teams):** Balanced possession, vertical progression, strong mid-block structure.
-* **Cluster 3 — High-Pressing Workhorses (27 Teams):** Intense pressing turnover rates with varied possession dominance.
+| Cluster | Archetype | Defining Characteristics |
+| :--- | :--- | :--- |
+| **Cluster 0** | **Deep Block / Direct Units** | Low possession, direct long-ball progression, high volume of clearances and defensive actions. |
+| **Cluster 1** | **Elite Dominators** | High possession (>55%), high pressing in the final third, heavy penalty-box touch volume. |
+| **Cluster 2** | **Transition Specialists** | Balanced possession, vertical transition play, resilient mid-block structure. |
+| **Cluster 3** | **High-Pressing Workhorses** | Intensive defensive turnover generation, varied possession share, aggressive pressing actions. |
 
 ---
 
-## 📊 Macro-Level League Insights
+## 💻 Interactive Dashboard Features
 
-Using **Median Absolute Deviation (MAD)** on PCA component axes, custom macro metrics were constructed to evaluate competitive structure across domestic leagues:
+The dashboard is deployed on Render and built with **Plotly Dash** to provide intuitive, multi-dimensional team evaluations:
+
+* **Interactive Team Selector:** Filter clubs by domestic league to inspect individual tactical footprints.
+* **Radar Chart:** Compare individual club metrics against both their tactical cluster average and the wider European top-5 average.
+* **PCA Quadrant Scatter Plots:** Interactive scatter plots visualizing all 96 clubs across the Performance vs. Game Control axes with cluster coloring.
+* **Financial vs. Performance Views:** Scatter visualizations mapping payroll allocations against tactical control and conversion rates.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Language:** Python 3.9+
+* **Data Processing & Analytics:** `pandas`, `numpy`
+* **Machine Learning & Statistics:** `scikit-learn` (StandardScaler, PCA, KMeans)
+* **Visualization & Web Application:** `plotly`, `plotly-express`, `dash`, `matplotlib`, `seaborn`
+* **Deployment:** `Render` / `Gunicorn`
+
+---
+
+## 📁 Repository Structure
 
 ```text
-League Strength/Level Gap Ranking (Performance Axis MAD):
-1. Germany  (MAD: 1.284)  --> Highest internal inequality (Top-heavy power concentration)
-2. Italy    (MAD: 1.259)
-3. France   (MAD: 1.070)
-4. Spain    (MAD: 0.682)
-5. England  (MAD: 0.612)  --> Highest competitive parity bottom-to-top
-
-League Tactical Diversity Ranking (Game Control Axis MAD):
-1. France   (MAD: 1.898)  --> Most varied tactical spectrum (Elite testing ground for adaptability)
-2. Italy    (MAD: 1.821)
-3. Germany  (MAD: 1.492)
-4. England  (MAD: 1.434)
-5. Spain    (MAD: 0.644)  --> Most homogeneous playstyle distribution
+├── .gitignore
+├── Procfile                              # Render deployment command
+├── requirements.txt                      # Project dependencies
+├── app.py                                # Plotly Dash web dashboard application
+├── Top_5_Soccer_Euro_Leagues.ipynb       # Core data cleaning, EDA, PCA & Clustering notebook
+├── data/
+│   ├── Raw_top5_euro_leagues_teams_stats/
+│   │   ├── premierleague_team_stats.csv
+│   │   ├── laliga_team_stats.csv
+│   │   ├── bundesliga_team_stats.csv
+│   │   ├── serieA_team_stats.csv
+│   │   ├── ligue1_team_stats.csv
+│   │   └── Salaries.csv
+│   └── processed_top5_euro_leagues.csv
+└── README.md
